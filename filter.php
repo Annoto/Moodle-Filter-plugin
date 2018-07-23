@@ -27,6 +27,8 @@ defined('MOODLE_INTERNAL') || die();
 
 class filter_annoto extends moodle_text_filter {
     public function filter($text, array $options = array()) {
+        global $CFG, $USER, $PAGE, $cm, $page;
+
 
         // Get plugin global settings
         $settings = get_config('filter_annoto');
@@ -35,52 +37,110 @@ class filter_annoto extends moodle_text_filter {
         $playerid = "annotoscript";
         $playertype = "undefined";
 
+        // Annoto's scritp url
+        $scripturl = $settings->scripturl;
+
+        // is user logged in or is guest
+        $userloggined = isloggedin();
+        $guestuser = isguestuser();
+        $loginurl = $CFG->wwwroot . "/login/index.php";
+        $logouturl = $CFG->wwwroot . "/login/logout.php?sesskey=" . sesskey();
+
         // Do a quick check using strpos to avoid unnecessary work
         if (!is_string($text) or empty($text)) {
             return $text;
         }
-
         // Do check if iframe or video and annoto tags are present
         if (!(stripos($text, '</video>') or stripos($text, '</iframe>'))) {
             return $text;
         }
 
-        // check if annoto is turned on
-        if (!stripos($text, '<annoto>')) {
-            return $text;
+        // check if Scope is for all site (false) or for pages with tag only (true) -- booleans here are strings for js compatibility
+        if ($settings->scope === 'true') {       
+            // check if annoto is turned on
+            if (!stripos($text, '<annoto>')) {
+                return $text;
+            }
         }
-
-        // youtube ifarme detector
-        $youtubepattern = "%(<iframe)(.*youtube)%i";
-        preg_match($youtubepattern, $text, $match);
-        if (!empty($match)) {
-            $text = preg_replace($youtubepattern, "<iframe id='".$playerid."'$2", $text);
-            $playertype = "youtube";
+        
+        // get first player on the page
+        if ($youtubepos = stripos($text, 'youtu')) {
+            $pplayers['youtube'] = $youtubepos;
         }
-
-        // vimeo ifarme detector
-        $vimeopattern = "%(<iframe)(.*vimeo)%i";
-        preg_match($vimeopattern, $text, $match);
-        if (!empty($match)) {
-            $text = preg_replace($vimeopattern, "<iframe id='".$playerid."'$2", $text);
-            $playertype = "vimeo";
+        if ($vimeopos = stripos($text, 'vimeo')){
+            $pplayers['vimeo'] = $vimeopos;
         }
-
-        // videojs detector
-        $vjspattern = "%(<video)%i";
-        preg_match($vjspattern, $text, $match);
-        if (!empty($match)) {
-            $text = preg_replace($vjspattern, "<video id='".$playerid."'", $text);
-            $playertype = "videojs";
+        if ($videojspos = stripos($text, '</video>')) {
+            $pplayers['videojs'] = $videojspos;
         }
+        $firstpalyerarr = array_keys($pplayers, min($pplayers));
+        $firstpalyer = $firstpalyerarr[0];
 
+        // attach annoto script to the first found player
+        switch ($firstpalyer) {
+            case "youtube":
+                $idpattern = '%<iframe.*id=[\'"`]+([^\'"`]+)[\'"`]%i';
+                preg_match($idpattern, $text, $match);
+                if (!empty($match)) {
+                    $playerid = $match[1];
+                }
+
+                $youtubepattern = "%(<iframe)(.*youtube)%i";
+                preg_match($youtubepattern, $text, $match);
+                if (!empty($match)) {
+                    $text = preg_replace($youtubepattern, "<iframe id='".$playerid."'$2", $text);
+                    $playertype = "youtube";
+                    $playerfound = true;
+                }
+                break;
+
+            case "vimeo":
+                $idpattern = '%<iframe.*id=[\'"`]+([^\'"`]+)[\'"`]%i';
+                preg_match($idpattern, $text, $match);
+                if (!empty($match)) {
+                    $playerid = $match[1];
+                }
+
+                $vimeopattern = "%(<iframe)(.*vimeo)%i";
+                preg_match($vimeopattern, $text, $match);
+                if (!empty($match)) {
+                    $text = preg_replace($vimeopattern, "<iframe id='".$playerid."'$2", $text);
+                    $playertype = "vimeo";
+                    $playerfound = true;
+                }
+                break;
+
+            case "videojs":
+                $idpattern = '%<video.*id=[\'"`]+([^\'"`]+)[\'"`]%i';
+                preg_match($idpattern, $text, $match);
+                if (!empty($match)) {
+                    $playerid = $match[1];
+                }
+                
+                $vjspattern = "%(<video)%i";
+                preg_match($vjspattern, $text, $match);
+                if (!empty($match)) {
+                    $text = preg_replace($vjspattern, "<video id='".$playerid."'", $text);
+                    $playertype = "videojs";
+                    $playerfound = true;
+                }
+                break;
+        }
+        
         // Provide page and js with data
-        global $USER, $PAGE;
-
         // get user's avatar
         $userpicture = new user_picture($USER);
         $userpicture->size = 150;
         $userpictureurl = $userpicture->get_url($PAGE);
+
+        // get activity data for mediaDetails
+        $cmtitle = $PAGE->cm->name;
+        $cmintro = ($page->intro) ? $page->intro : '';
+        $currentgroupid = '';
+        $currentgroupid = groups_get_activity_group($cm);  // this function returns active group in current activity (moste relevant option)
+        // $currentgroupid = groups_get_activity_allowed_groups($cm); // this function provides array of user's allowed groups in current course
+        $currentgroupname = '';
+        $currentgroupname = groups_get_group_name($currentgroupid);
 
         // locale settings
         if ($settings->locale == "auto") {
@@ -109,9 +169,14 @@ class filter_annoto extends moodle_text_filter {
         $key = $settings->ssosecret;                // SSO secret from global settings        
         $jwt = JWT::encode($payload, $key);         // Create and encode JWT for Annoto script
 
+        // empty jwt for not loggined users and guests
+        if (!$userloggined || $guestuser) {
+            $jwt = '';
+        }
+
         // Prepare data for including with filter
         $annoto = <<<EOT
-        <script src="https://app.annoto.net/annoto-bootstrap.js"></script>
+        <script src="{$scripturl}"></script>
         <script>
             var config = {
                 clientId: '{$jwt}',
@@ -120,11 +185,33 @@ class filter_annoto extends moodle_text_filter {
                     tabs: $settings->tabs,
                     cta:  $settings->cta,
                 },
+                ux :{
+                    ssoAuthRequestHandle: function() {
+                        window.location.replace('{$loginurl}')
+                    },
+                    logoutRequestHandle: function() {
+                        window.location.replace('{$logouturl}')
+                    }
+                },
                 widgets: [
                     {
                         player: {
                             type: '{$playertype}',
-                            element: '{$playerid}'  /* DOM element id of the player demo-yt-player */
+                            element: '{$playerid}',                  /* DOM element id of the player demo-yt-player */
+                            MediaDetails : {
+                                title : '$cmtitle',
+                                description: '$cmintro',                // (Optional) Media description
+                                thumbnails: '',
+                                authorName: '',
+                                group: {                             // (Optional) Course/group
+                                    id: '$currentgroupid',            // Unique group identifier
+                                    type: 'playlist',               // playlist is the default playlist | users
+                                    title: '$currentgroupname',       // Group title
+                                    privateThread: $settings->discussionscope,  // false by default. If set to true the The discussion will be private to the group.
+                                    description: '$currentgroupname',  // (Optional) Group description
+                                    thumbnails: '',
+                                },
+                            },
                         },
                         timeline: {
                             embedded: false,
