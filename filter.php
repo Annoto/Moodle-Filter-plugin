@@ -36,6 +36,7 @@ class filter_annoto extends moodle_text_filter {
         // set id of the video frame where script should be attached
         $playerid = "annotoscript";
         $playertype = "undefined";
+        $playerfound = false;
 
         // Annoto's scritp url
         $scripturl = $settings->scripturl;
@@ -70,57 +71,57 @@ class filter_annoto extends moodle_text_filter {
         if ($vimeopos = stripos($text, 'vimeo')){
             $pplayers['vimeo'] = $vimeopos;
         }
-        if ($videojspos = stripos($text, '</video>')) {
+        if ($videojspos = stripos($text, 'mediaplugin')) {
             $pplayers['videojs'] = $videojspos;
         }
-        $firstpalyerarr = array_keys($pplayers, min($pplayers));
-        $firstpalyer = $firstpalyerarr[0];
+        $firstplayerarr = array_keys($pplayers, min($pplayers));
+        $firstplayer = $firstplayerarr[0];
 
         // attach annoto script to the first found player
-        switch ($firstpalyer) {
+        switch ($firstplayer) {
             case "youtube":
-                $idpattern = '%<iframe.*id=[\'"`]+([^\'"`]+)[\'"`]%i';
-                preg_match($idpattern, $text, $match);
-                if (!empty($match)) {
-                    $playerid = $match[1];
+                $ytbidpattern = '%<iframe.*id=[\'"`]+([^\'"`]+)[\'"`].*<\/iframe>%i';
+                preg_match($ytbidpattern, $text, $ytbidmatch);
+                if (!empty($ytbidmatch) && !$playerfound) {
+                    $playerid = $ytbidmatch[1];
                 }
 
                 $youtubepattern = "%(<iframe)(.*youtube)%i";
-                preg_match($youtubepattern, $text, $match);
-                if (!empty($match)) {
-                    $text = preg_replace($youtubepattern, "<iframe id='".$playerid."'$2", $text);
+                preg_match($youtubepattern, $text, $ytbpmatch);
+                if (!empty($ytbpmatch)) {
+                    $text = preg_replace($youtubepattern, "<iframe id='".$playerid."'$2", $text, 1);
                     $playertype = "youtube";
                     $playerfound = true;
                 }
                 break;
 
             case "vimeo":
-                $idpattern = '%<iframe.*id=[\'"`]+([^\'"`]+)[\'"`]%i';
-                preg_match($idpattern, $text, $match);
-                if (!empty($match)) {
-                    $playerid = $match[1];
+                $vmidpattern = '%<iframe.*id=[\'"`]+([^\'"`]+)[\'"`].*<\/iframe>%i';
+                preg_match($vmidpattern, $text, $vmidmatch);
+                if (!empty($vmidmatch) && !$playerfound) {
+                    $playerid = $vmidmatch[1];
                 }
 
                 $vimeopattern = "%(<iframe)(.*vimeo)%i";
-                preg_match($vimeopattern, $text, $match);
-                if (!empty($match)) {
-                    $text = preg_replace($vimeopattern, "<iframe id='".$playerid."'$2", $text);
+                preg_match($vimeopattern, $text, $vmpmatch);
+                if (!empty($vmpmatch)) {
+                    $text = preg_replace($vimeopattern, "<iframe id='".$playerid."'$2", $text, 1);
                     $playertype = "vimeo";
                     $playerfound = true;
                 }
                 break;
 
             case "videojs":
-                $idpattern = '%<video.*id=[\'"`]+([^\'"`]+)[\'"`]%i';
-                preg_match($idpattern, $text, $match);
-                if (!empty($match)) {
-                    $playerid = $match[1];
+                $vjsidpattern = '%<video.*id=[\'"`]+([^\'"`]+)[\'"`].*<\/video>%i';
+                preg_match($vjsidpattern, $text, $vjsidmatch);
+                if (!empty($vjsidmatch) && !$playerfound) {
+                    $playerid = $vjsidmatch[1];
                 }
                 
                 $vjspattern = "%(<video)%i";
-                preg_match($vjspattern, $text, $match);
-                if (!empty($match)) {
-                    $text = preg_replace($vjspattern, "<video id='".$playerid."'", $text);
+                preg_match($vjspattern, $text, $vjspmatch);
+                if (!empty($vjspmatch)) {
+                    $text = preg_replace($vjspattern, "<video id='".$playerid."'", $text, 1);
                     $playertype = "videojs";
                     $playerfound = true;
                 }
