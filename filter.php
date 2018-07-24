@@ -213,7 +213,7 @@ class filter_annoto extends moodle_text_filter {
                                     description: '$currentgroupname',  // (Optional) Group description
                                     thumbnails: '',
                                 },
-                            }},
+                            },
                         },
                         timeline: {
                             embedded: false,
@@ -231,6 +231,28 @@ class filter_annoto extends moodle_text_filter {
                 locale: '{$lang}'
             };
 
+            if (window.Annoto) {
+				window.Annoto.on('ready', function (api) {
+            var jwt = '{$jwt}';
+            if (api && jwt && jwt !== '') {
+                api.auth(jwt).catch(function() {
+                    console && console.error('Annoto: SSO auth error');
+                });
+            }
+			});
+			if ('{$playertype}' === 'videojs' && window.requirejs) {
+            window.requirejs(['media_videojs/video-lazy'], function(vjs) {
+                config.widgets[0].player.params = {
+                    videojs: vjs
+                };
+                window.Annoto.boot(config);
+            });
+        } else {
+            window.Annoto.boot(config);
+        }
+		} else {
+			console && console.error('Annoto: not loaded');
+		}
         </script>
 
 EOT;
