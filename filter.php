@@ -199,9 +199,8 @@ class filter_annoto extends moodle_text_filter {
                         player: {
                             type: '{$playertype}',
                             element: '{$playerid}',                  /* DOM element id of the player demo-yt-player */
-                            MediaDetails :  function() {
-                              return {
-                                title : '$cmtitle',
+                            MediaDetails : function () {
+                                return {title : '$cmtitle',
                                 description: '$cmintro',                // (Optional) Media description
                                 thumbnails: '',
                                 authorName: '',
@@ -212,7 +211,7 @@ class filter_annoto extends moodle_text_filter {
                                     privateThread: $settings->discussionscope,  // false by default. If set to true the The discussion will be private to the group.
                                     description: '$currentgroupname',  // (Optional) Group description
                                     thumbnails: '',
-                                },
+                                }};
                             },
                         },
                         timeline: {
@@ -241,18 +240,17 @@ class filter_annoto extends moodle_text_filter {
 				}
 			});
 			if ('{$playertype}' === 'videojs' && window.requirejs) {
-            window.requirejs(['media_videojs/video-lazy'], function(vjs) {
-                config.widgets[0].player.params = {
-                    videojs: vjs
-                };
-                window.Annoto.boot(config);
-            });
+				window.requirejs(['media_videojs/video-lazy'], function(vjs) {
+					config.widgets[0].player.params = {
+						videojs: vjs
+					};
+					window.Annoto.boot(config);
+				});
 			} else {
 				window.Annoto.boot(config);
 			}
 			} else {
 				console && console.error('Annoto: not loaded');
-			}
 			}
         </script>
 
