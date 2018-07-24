@@ -199,7 +199,8 @@ class filter_annoto extends moodle_text_filter {
                         player: {
                             type: '{$playertype}',
                             element: '{$playerid}',                  /* DOM element id of the player demo-yt-player */
-                            MediaDetails : {
+                            MediaDetails :  function() {
+                              return {
                                 title : '$cmtitle',
                                 description: '$cmintro',                // (Optional) Media description
                                 thumbnails: '',
@@ -212,7 +213,7 @@ class filter_annoto extends moodle_text_filter {
                                     description: '$currentgroupname',  // (Optional) Group description
                                     thumbnails: '',
                                 },
-                            },
+                            }},
                         },
                         timeline: {
                             embedded: false,
@@ -230,19 +231,6 @@ class filter_annoto extends moodle_text_filter {
                 locale: '{$lang}'
             };
 
-            window.onload = function () {
-                if (window.Annoto) {
-                    console && console.info('Annoto: Boot');
-                    window.Annoto.on('ready', function (api) {
-                        if (api) {
-                            console && console.info('Annoto: got api! %O', api);
-                        }
-                    });
-                    window.Annoto.boot(config);
-                } else {
-                    console && console.error('Annoto: not loaded');
-                }
-            }
         </script>
 
 EOT;
