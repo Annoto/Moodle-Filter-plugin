@@ -77,7 +77,7 @@ class filter_annoto extends moodle_text_filter {
         if ($vimeopos = stripos($text, 'vimeo')){
             $pplayers['vimeo'] = $vimeopos;
         }
-        if ($videojspos = stripos($text, 'mediaplugin')) {
+        if ($videojspos = stripos($text, 'mediaplugin_videojs')) {
             $pplayers['videojs'] = $videojspos;
         }
         $firstplayerarr = array_keys($pplayers, min($pplayers));
