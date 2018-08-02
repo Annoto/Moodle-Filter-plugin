@@ -25,11 +25,11 @@ defined('MOODLE_INTERNAL') || die;
 
     // Tabs
     $settings->add(new admin_setting_configcheckbox('filter_annoto/tabs', get_string('tabs','filter_annoto'),
-    get_string('tabsdesc', 'filter_annoto'), 'true', 'true', 'false'));
+    get_string('tabsdesc', 'filter_annoto'), 'false', 'true', 'false'));
 
     // Call To Action
     $settings->add(new admin_setting_configcheckbox('filter_annoto/cta', get_string('cta','filter_annoto'),
-    get_string('ctadesc', 'filter_annoto'), 'true', 'true', 'false'));
+    get_string('ctadesc', 'filter_annoto'), 'false', 'true', 'false'));
 
     // Locale
     $settings->add(new admin_setting_configselect('filter_annoto/locale', get_string('locale','filter_annoto'),
@@ -39,7 +39,7 @@ defined('MOODLE_INTERNAL') || die;
     
     // Global Scope
     $settings->add(new admin_setting_configcheckbox('filter_annoto/scope', get_string('scope','filter_annoto'),
-    get_string('scopedesc', 'filter_annoto'), 'false', 'true', 'false'));
+    get_string('scopedesc', 'filter_annoto'), 'true', 'true', 'false'));
     
     // Discussions Scope 
     $settings->add(new admin_setting_configselect('filter_annoto/discussionscope', get_string('discussionscope','filter_annoto'),
