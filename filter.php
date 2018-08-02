@@ -38,6 +38,11 @@ class filter_annoto extends moodle_text_filter {
         $playertype = "undefined";
         $playerfound = false;
 
+        // URL ACL
+        $urlacl = ($settings->urlacl) ? $settings->urlacl : null ;
+        $urlaclarr = preg_split("/\R/", $urlacl);
+        $isurlinacl = in_array($PAGE->url->out(), $urlaclarr);
+
         // Annoto's scritp url
         $scripturl = $settings->scripturl;
 
@@ -54,6 +59,14 @@ class filter_annoto extends moodle_text_filter {
         // Do check if iframe or video and annoto tags are present
         if (!(stripos($text, '</video>') or stripos($text, '</iframe>'))) {
             return $text;
+        }
+
+        // check if Scope is for all site (false) or for pages with tag only (true) -- booleans here are strings for js compatibility
+        if ($settings->scope === 'true') {
+            // check if annoto is turned on  or page url is in access list
+            if (!stripos($text, '<annoto>') && !$isurlinacl) {
+                return $text;
+            }
         }
 
         // check if Scope is for all site (false) or for pages with tag only (true) -- booleans here are strings for js compatibility
