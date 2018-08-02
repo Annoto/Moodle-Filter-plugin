@@ -204,19 +204,21 @@ class filter_annoto extends moodle_text_filter {
                         player: {
                             type: '{$playertype}',
                             element: '{$playerid}',                  /* DOM element id of the player demo-yt-player */
-                            MediaDetails : function () {
-                                return {title : '$cmtitle',
-                                description: '$cmintro',                // (Optional) Media description
-                                thumbnails: '',
-                                authorName: '',
-                                group: {                             // (Optional) Course/group
-                                    id: '$currentgroupid',            // Unique group identifier
-                                    type: 'playlist',               // playlist is the default playlist | users
-                                    title: '$currentgroupname',       // Group title
-                                    privateThread: $settings->discussionscope,  // false by default. If set to true the The discussion will be private to the group.
-                                    description: '$currentgroupname',  // (Optional) Group description
+                            mediaDetails : function () {
+                                return {
+                                    title : '$cmtitle',
+                                    description: '$cmintro',                // (Optional) Media description
                                     thumbnails: '',
-                                }};
+                                    authorName: '',
+                                    group: {                             // (Optional) Course/group
+                                        id: '$currentgroupid',            // Unique group identifier
+                                        type: 'playlist',               // playlist is the default playlist | users
+                                        title: '$currentgroupname',       // Group title
+                                        privateThread: $settings->discussionscope,  // false by default. If set to true the The discussion will be private to the group.
+                                        description: '$currentgroupname',  // (Optional) Group description
+                                        thumbnails: '',
+                                    }
+                                };
                             },
                         },
                         timeline: {
