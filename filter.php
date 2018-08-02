@@ -16,10 +16,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * HTML  tidy text filter.
+ * HTML annoto text filter.
  *
  * @package    filter_annoto
- * @copyright  Devlion
+ * @copyright  Annoto Ltd.
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -37,6 +37,7 @@ class filter_annoto extends moodle_text_filter {
         $playerid = "annotoscript";
         $playertype = "undefined";
         $playerfound = false;
+        $isGlobalScope = filter_var($settings->scope, FILTER_VALIDATE_BOOLEAN);
 
         // URL ACL
         $urlacl = ($settings->urlacl) ? $settings->urlacl : null ;
@@ -61,8 +62,8 @@ class filter_annoto extends moodle_text_filter {
             return $text;
         }
 
-        // check if Scope is for all site (false) or for pages with tag only (true) -- booleans here are strings for js compatibility
-        if ($settings->scope === 'true') {
+        // check if Scope is for all site (true) or for pages with tag only (false)
+        if (!($isGlobalScope)) {
             // check if annoto is turned on  or page url is in access list
             if (!stripos($text, '<annoto>') && !$isurlinacl) {
                 return $text;
@@ -154,8 +155,6 @@ class filter_annoto extends moodle_text_filter {
         } else {
             $lang = $settings->locale;
         }
-        // define rtl property according to locale setting
-        $rtl = ($lang == "he") ? "true" : "false";
 
         // Create and encode JWT for Annoto script
         require_once('JWT.php');                    // Load JWT lib
@@ -181,91 +180,28 @@ class filter_annoto extends moodle_text_filter {
         }
 
         // Prepare data for including with filter
-        $annoto = <<<EOT
-        <script src="{$scripturl}"></script>
-        <script>
-            var config = {
-                clientId: '{$jwt}',
-                position: '{$settings->widgetposition}',
-                features: {
-                    tabs: $settings->tabs,
-                    cta:  $settings->cta,
-                },
-                ux :{
-                    ssoAuthRequestHandle: function() {
-                        window.location.replace('{$loginurl}')
-                    },
-                    logoutRequestHandle: function() {
-                        window.location.replace('{$logouturl}')
-                    }
-                },
-                widgets: [
-                    {
-                        player: {
-                            type: '{$playertype}',
-                            element: '{$playerid}',                  /* DOM element id of the player demo-yt-player */
-                            mediaDetails : function () {
-                                return {
-                                    title : '$cmtitle',
-                                    description: '$cmintro',                // (Optional) Media description
-                                    thumbnails: '',
-                                    authorName: '',
-                                    group: {                             // (Optional) Course/group
-                                        id: '$currentgroupid',            // Unique group identifier
-                                        type: 'playlist',               // playlist is the default playlist | users
-                                        title: '$currentgroupname',       // Group title
-                                        privateThread: $settings->discussionscope,  // false by default. If set to true the The discussion will be private to the group.
-                                        description: '$currentgroupname',  // (Optional) Group description
-                                        thumbnails: '',
-                                    }
-                                };
-                            },
-                        },
-                        timeline: {
-                            embedded: false,
-                            overlayVideo: false
-                        },
-                        demoDiscussion: 'portals-showcase',
-                        openOnLoad: true,
-                    }
-                ],
-                thread: {
-                    showReplies: true
-                },
-                demoMode: {$settings->demomode},
-                rtl: {$rtl},
-                locale: '{$lang}'
-            };
+        $jsParams = array(array(
+            'bootstrapUrl' => $scripturl,
+            'clientId' => $settings->clientid,
+            'userToken' => $jwt,
+            'position' => $settings->widgetposition,
+            'featureTab' => filter_var($settings->tabs, FILTER_VALIDATE_BOOLEAN),
+            'featureCTA' => filter_var($settings->cta, FILTER_VALIDATE_BOOLEAN),
+            'loginUrl' => $loginurl,
+            'logoutUrl' => $logouturl,
+            'playerType' => $playertype,
+            'playerId' => $playerid,
+            'mediaTitle' => $cmtitle,
+            'mediaDescription' => $cmintro,
+            'mediaGroupId' => $currentgroupid,
+            'mediaGroupTitle' => $currentgroupname,
+            'privateThread' => filter_var($settings->discussionscope, FILTER_VALIDATE_BOOLEAN),
+            'locale' => $lang,
+            'rtl' => filter_var(($lang === "he"), FILTER_VALIDATE_BOOLEAN),
+            'demoMode' => filter_var($settings->demomode, FILTER_VALIDATE_BOOLEAN),
+        ));
+        $PAGE->requires->js_call_amd('filter_annoto/annoto-filter', 'init', $jsParams);
 
-            if (window.Annoto) {
-				window.Annoto.on('ready', function (api) {
-				var jwt = '{$jwt}';
-				if (api && jwt && jwt !== '') {
-					api.auth(jwt).catch(function() {
-						console && console.error('Annoto: SSO auth error');
-					});
-				}
-			});
-			if ('{$playertype}' === 'videojs' && window.requirejs) {
-				window.requirejs(['media_videojs/video-lazy'], function(vjs) {
-					config.widgets[0].player.params = {
-						videojs: vjs
-					};
-					window.Annoto.boot(config);
-				});
-			} else {
-				window.Annoto.boot(config);
-			}
-			} else {
-				console && console.error('Annoto: not loaded');
-			}
-        </script>
-
-EOT;
-
-        $text .= $annoto;
-
-        
         return $text;
     }
 }

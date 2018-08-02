@@ -16,10 +16,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Strings for component 'filter_tidy', language 'en', branch 'MOODLE_20_STABLE'
+ * Strings for component 'filter_annoto', language 'en', branch 'MOODLE_20_STABLE'
  *
  * @package   filter_annoto
- * @copyright Devlion
+ * @copyright Annoto Ltd.
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
