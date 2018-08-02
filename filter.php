@@ -68,14 +68,6 @@ class filter_annoto extends moodle_text_filter {
                 return $text;
             }
         }
-
-        // check if Scope is for all site (false) or for pages with tag only (true) -- booleans here are strings for js compatibility
-        if ($settings->scope === 'true') {       
-            // check if annoto is turned on
-            if (!stripos($text, '<annoto>')) {
-                return $text;
-            }
-        }
         
         // get first player on the page
         if ($youtubepos = stripos($text, 'youtu')) {
