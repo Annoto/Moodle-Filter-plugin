@@ -118,6 +118,9 @@ class filter_annoto extends moodle_text_filter {
                 break;
 
             case "videojs":
+                // videojs media plugin always uses <video> html tag when embedding videos even if it's YouTube link
+                // When the filter examins the page it sees the origin <video> videojs media plugin uses.
+                // It is later replaced by <div> with same id (by videjs javascript) so we can use the id as playerId.
                 $vjsidpattern = '%<video.*id=[\'"`]+([^\'"`]+)[\'"`].*<\/video>%i';
                 preg_match($vjsidpattern, $text, $vjsidmatch);
                 if (!empty($vjsidmatch) && !$playerfound) {
