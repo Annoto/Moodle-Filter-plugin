@@ -7,7 +7,7 @@ define(['jquery'], function($) {
                 this.logWarn('empty params');
                 return;
             }
-            
+
             require([params.bootstrapUrl], this.bootWidget.bind(this));
         },
         bootWidget: function() {
@@ -79,11 +79,11 @@ define(['jquery'], function($) {
 				that.logWarn('Annoto not loaded');
 			}
         },
-        logWarn: function(msg, arg = '') {
-            console && console.warn('AnnotoFilterPlugin: ' + msg, arg);
+        logWarn: function(msg, arg) {
+            console && console.warn('AnnotoFilterPlugin: ' + msg, arg || '');
         },
-        logError: function(msg, err = '') {
-            console && console.error('AnnotoFilterPlugin: ' + msg, arg);
+        logError: function(msg, err) {
+            console && console.error('AnnotoFilterPlugin: ' + msg, arg || '');
         }
     };
 });
