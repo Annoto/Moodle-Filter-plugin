@@ -60,14 +60,13 @@ defined('MOODLE_INTERNAL') || die;
                                                                 'en' => get_string('localeen','filter_annoto'),
                                                                 'he' => get_string('localehe','filter_annoto'))));
     
+    // Discussions Scope 
+    $settings->add(new admin_setting_configselect('filter_annoto/discussionscope', get_string('discussionscope','filter_annoto'),
+    get_string('discussionscopedesc', 'filter_annoto'), 'true', array(  'false' => get_string('discussionscopesitewide','filter_annoto'),
+                                                                    'true' => get_string('discussionscopeprivate','filter_annoto'))));
     // Global Scope
     $settings->add(new admin_setting_configcheckbox('filter_annoto/scope', get_string('scope','filter_annoto'),
     get_string('scopedesc', 'filter_annoto'), 'true', 'true', 'false'));
-    
-    // Discussions Scope 
-    $settings->add(new admin_setting_configselect('filter_annoto/discussionscope', get_string('discussionscope','filter_annoto'),
-    get_string('discussionscopedesc', 'filter_annoto'), 'false', array(  'false' => get_string('discussionscopesitewide','filter_annoto'),
-                                                                   'true' => get_string('discussionscopeprivate','filter_annoto'))));
 
     // URL ACL
     $settings->add(new admin_setting_configtextarea('filter_annoto/urlacl', get_string('urlacl','filter_annoto'),

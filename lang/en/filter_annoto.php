@@ -51,9 +51,9 @@ $string['localeauto'] = 'Auto (by default)';
 $string['localeen'] = 'English';
 $string['localehe'] = 'Hebrew';
 $string['scope'] = 'Global Scope';
-$string['scopedesc'] = 'Choose where you want to allow Annoto plugin: uncheck - all site (by default), check - page only';
+$string['scopedesc'] = 'Choose where you want to allow Annoto plugin: check - all site (by default), uncheck - allow only for ACL list and for allowed pages using Annoto Atto plugin';
 $string['discussionscope'] = 'Discussions Scope';
-$string['discussionscopedesc'] = 'Choose where you want to allow widget discussions: site wide (by default) or private per course only';
+$string['discussionscopedesc'] = 'Choose scope of Annoto discussions: private per course (default) or site wide (if same video is used in multiple courses the discussion will be pulic across courses)';
 $string['discussionscopesitewide'] = 'Site wide';
 $string['discussionscopeprivate'] = 'Private per course';
 
