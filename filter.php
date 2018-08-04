@@ -235,7 +235,17 @@ class filter_annoto extends moodle_text_filter {
     }
 
     private function get_lang() {
-        global $SESSION, $COURSE;
-        return isset($SESSION->lang) ? $SESSION->lang : isset($COURSE->lang) ? $COURSE->lang : isset($USER->lang) ? $USER->lang : current_language();
+        global $PAGE, $SESSION, $COURSE, $USER;
+        
+        if (isset($COURSE->lang) and !empty($COURSE->lang)) {
+            return $COURSE->lang;
+        }
+        if (isset($SESSION->lang) and !empty($SESSION->lang)) {
+            return $SESSION->lang;
+        }
+        if (isset($USER->lang) and !empty($USER->lang)) {
+            return $USER->lang;
+         }
+         return current_language();
     }
 }
