@@ -30,7 +30,7 @@ defined('MOODLE_INTERNAL') || die();
 
 class filter_annoto extends moodle_text_filter {
     public function filter($text, array $options = array()) {
-        global $CFG, $PAGE, $page;
+        global $CFG, $PAGE;
 
         // check if we run on course page
         if (!is_object($PAGE->cm)) {
@@ -69,13 +69,21 @@ class filter_annoto extends moodle_text_filter {
         // get activity data for mediaDetails
         $cmtitle = $PAGE->cm->name;
         $cmintro = ($PAGE->activityrecord->intro) ? $PAGE->activityrecord->intro : '';
-        $currentgroupid = groups_get_activity_group($PAGE->cm);  // this function returns active group in current activity (most relevant option)
+        // $currentgroupid = groups_get_activity_group($PAGE->cm);  // this function returns active group in current activity (most relevant option)
         // $currentgroupid = groups_get_activity_allowed_groups($PAGE->cm); // this function provides array of user's allowed groups in current course
-        $currentgroupname = groups_get_group_name($currentgroupid);
+        // $currentgroupname = groups_get_group_name($currentgroupid);
+
+        // get course info
+        if (is_object($PAGE->course)) {
+            $courseId = $PAGE->course->id;
+            $courseName = $PAGE->course->fullname;
+            $courseSummary = $PAGE->course->summary;
+        }
+
 
         // locale settings
         if ($settings->locale == "auto") {
-            $lang = current_language();
+            $lang = $this->get_lang();
         } else {
             $lang = $settings->locale;
         }
@@ -91,11 +99,12 @@ class filter_annoto extends moodle_text_filter {
             'logoutUrl' => $logouturl,
             'mediaTitle' => $cmtitle,
             'mediaDescription' => $cmintro,
-            'mediaGroupId' => $currentgroupid,
-            'mediaGroupTitle' => $currentgroupname,
+            'mediaGroupId' => $courseId,
+            'mediaGroupTitle' => $courseName,
+            'mediaGroupDescription' => $courseSummary,
             'privateThread' => filter_var($settings->discussionscope, FILTER_VALIDATE_BOOLEAN),
             'locale' => $lang,
-            'rtl' => filter_var(($lang === "he"), FILTER_VALIDATE_BOOLEAN),
+            'rtl' => filter_var((substr($lang, 0, 2) === "he"), FILTER_VALIDATE_BOOLEAN),
             'demoMode' => filter_var($settings->demomode, FILTER_VALIDATE_BOOLEAN),
             'defaultPlayerId' => $defaultplayerid
         );
@@ -223,5 +232,10 @@ class filter_annoto extends moodle_text_filter {
         }
 
         return $jwt;
+    }
+
+    private function get_lang() {
+        global $SESSION, $COURSE;
+        return isset($SESSION->lang) ? $SESSION->lang : isset($COURSE->lang) ? $COURSE->lang : isset($USER->lang) ? $USER->lang : current_language();
     }
 }
