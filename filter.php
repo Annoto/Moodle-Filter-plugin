@@ -47,18 +47,32 @@ class filter_annoto extends moodle_text_filter {
         $playerfound = false;
         $isglobalscope = filter_var($settings->scope, FILTER_VALIDATE_BOOLEAN);
 
-        // URL ACL
-        $urlacl = ($settings->urlacl) ? $settings->urlacl : null ;
-        $urlaclarr = preg_split("/\R/", $urlacl);
-        $pageurl = $PAGE->url->out();
-
-        $isurlinacl = in_array($pageurl, $urlaclarr);
-
         $textisempty = (!is_string($text) or empty($text));
 
         // If scope is not Global, check if url is in access list or if tag is present
         if(!$isglobalscope) {
-            if (!$isurlinacl and ($textisempty or !stripos($text, '<annoto>'))) {
+            // ACL
+            $acltext = ($settings->urlacl) ? $settings->urlacl : null ;
+            $aclarr = preg_split("/\R/", $acltext);
+            $iscourseinacl = false;
+            $isurlinacl = false;
+
+            if (is_object($PAGE->course)) {
+                $iscourseinacl = in_array($PAGE->course->id, $aclarr);
+            }
+            if (!$iscourseinacl) {
+                $pageurl = $PAGE->url->out();
+                $isurlinacl = in_array($pageurl, $aclarr);
+            }
+            $isaclmatch = ($iscourseinacl || $isurlinacl);
+            $PAGE->requires->js_call_amd('filter_annoto/annoto-filter', 'log', array('acl', array(
+                'isurlinacl' => $isurlinacl,
+                'iscourseinacl' => $iscourseinacl,
+                'isaclmatch' => $isaclmatch,
+                'courseId' => $PAGE->course->id,
+                'aclarr' => $aclarr,
+            )));
+            if (!$isaclmatch and ($textisempty or !stripos($text, '<annoto>'))) {
                 return $text;
             }
         }
@@ -216,6 +230,8 @@ class filter_annoto extends moodle_text_filter {
         $issuedat = time();                       // Get current time
         $expire = $issuedat + 60 * 20;            // Adding 20 minutes
 
+        //TODO: implemented getting scope of the user
+        
         $payload = array(
             "jti" => $USER->id,                     // User's id in Moodle
             "name" => fullname($USER),              // User's fullname in Moodle
