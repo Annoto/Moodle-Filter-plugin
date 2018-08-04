@@ -1,17 +1,17 @@
-// This file is part of Annoto/moodle-filter-plugin - http://annoto.net/
-// https://github.com/Annoto/moodle-filter-plugin
-// Annoto/moodle-filter-plugin is free software: you can redistribute it and/or modify
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Annoto/moodle-filter-plugin is distributed in the hope that it will be useful,
+// Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Annoto/moodle-filter-plugin.  If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * javscript for component 'filter_annoto'.
@@ -22,12 +22,18 @@
  */
 
 define(['jquery'], function($) {
- 
+
     return {
-        init: function(params) {
+        init: function(playerfound, params) {
             this.params = params;
             if (!params) {
                 this.logWarn('empty params');
+                return;
+            }
+
+            if (!playerfound) {
+                // TODO: implement front end detection for cases when filter unable to detect on backend (h5p)
+                this.logWarn('player not found by filter, looking at frontend')
                 return;
             }
 

@@ -1,19 +1,19 @@
 <?php
 
-// This file is part of Annoto/moodle-filter-plugin - http://annoto.net/
-// https://github.com/Annoto/moodle-filter-plugin
-// Annoto/moodle-filter-plugin is free software: you can redistribute it and/or modify
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// Annoto/moodle-filter-plugin is distributed in the hope that it will be useful,
+// Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Annoto/moodle-filter-plugin.  If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * HTML annoto text filter.
@@ -25,49 +25,84 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+// error_reporting(E_ALL);
+// ini_set("display_errors", 1);
+
 class filter_annoto extends moodle_text_filter {
     public function filter($text, array $options = array()) {
-        global $CFG, $USER, $PAGE, $cm, $page;
+        global $CFG, $PAGE, $page;
 
+        // check if we run on course page
+        if (!is_object($PAGE->cm)) {
+            return $text;
+        }
 
         // Get plugin global settings
         $settings = get_config('filter_annoto');
-
+        
         // set id of the video frame where script should be attached
-        $playerid = "annotoscript";
-        $playertype = "undefined";
+        $playerid = "annoto_default_player_id";
+        $playertype = '';
         $playerfound = false;
-        $isGlobalScope = filter_var($settings->scope, FILTER_VALIDATE_BOOLEAN);
+        $isglobalscope = filter_var($settings->scope, FILTER_VALIDATE_BOOLEAN);
 
         // URL ACL
         $urlacl = ($settings->urlacl) ? $settings->urlacl : null ;
         $urlaclarr = preg_split("/\R/", $urlacl);
-        $isurlinacl = in_array($PAGE->url->out(), $urlaclarr);
+        $pageurl = $PAGE->url->out();
 
-        // Annoto's scritp url
-        $scripturl = $settings->scripturl;
+        $isurlinacl = in_array($pageurl, $urlaclarr);
 
-        // is user logged in or is guest
-        $userloggined = isloggedin();
-        $guestuser = isguestuser();
-        $loginurl = $CFG->wwwroot . "/login/index.php";
-        $logouturl = $CFG->wwwroot . "/login/logout.php?sesskey=" . sesskey();
+        $textisempty = (!is_string($text) or empty($text));
 
-        // Do a quick check using strpos to avoid unnecessary work
-        if (!is_string($text) or empty($text)) {
-            return $text;
-        }
-        // Do check if iframe or video and annoto tags are present
-        if (!(stripos($text, '</video>') or stripos($text, '</iframe>'))) {
-            return $text;
-        }
-
-        // check if Scope is for all site (true) or for pages with tag only (false)
-        if (!($isGlobalScope)) {
-            // check if annoto is turned on  or page url is in access list
-            if (!stripos($text, '<annoto>') && !$isurlinacl) {
+        // If scope is not Global, check if url is in access list or if tag is present
+        if(!$isglobalscope) {
+            if (!$isurlinacl and ($textisempty or !stripos($text, '<annoto>'))) {
                 return $text;
             }
+        }
+        
+        // get login, logout urls
+        $loginurl = $CFG->wwwroot . "/login/index.php";
+        $logouturl = $CFG->wwwroot . "/login/logout.php?sesskey=" . sesskey();
+        // get activity data for mediaDetails
+        $cmtitle = $PAGE->cm->name;
+        $cmintro = ($PAGE->activityrecord->intro) ? $PAGE->activityrecord->intro : '';
+        $currentgroupid = groups_get_activity_group($PAGE->cm);  // this function returns active group in current activity (most relevant option)
+        // $currentgroupid = groups_get_activity_allowed_groups($PAGE->cm); // this function provides array of user's allowed groups in current course
+        $currentgroupname = groups_get_group_name($currentgroupid);
+
+        // locale settings
+        if ($settings->locale == "auto") {
+            $lang = current_language();
+        } else {
+            $lang = $settings->locale;
+        }
+
+        $jsparams = array(
+            'bootstrapUrl' => $settings->scripturl,
+            'clientId' => $settings->clientid,
+            'userToken' => $this->get_user_token($settings),
+            'position' => $settings->widgetposition,
+            'featureTab' => filter_var($settings->tabs, FILTER_VALIDATE_BOOLEAN),
+            'featureCTA' => filter_var($settings->cta, FILTER_VALIDATE_BOOLEAN),
+            'loginUrl' => $loginurl,
+            'logoutUrl' => $logouturl,
+            'mediaTitle' => $cmtitle,
+            'mediaDescription' => $cmintro,
+            'mediaGroupId' => $currentgroupid,
+            'mediaGroupTitle' => $currentgroupname,
+            'privateThread' => filter_var($settings->discussionscope, FILTER_VALIDATE_BOOLEAN),
+            'locale' => $lang,
+            'rtl' => filter_var(($lang === "he"), FILTER_VALIDATE_BOOLEAN),
+            'demoMode' => filter_var($settings->demomode, FILTER_VALIDATE_BOOLEAN),
+        );
+
+        // Do a quick check using strpos to avoid unnecessary work
+        if ($textisempty or !(stripos($text, '</video>') or stripos($text, '</iframe>'))) {
+            // Give the front end script chance to find the player in cases when filter cannot
+            $PAGE->requires->js_call_amd('filter_annoto/annoto-filter', 'init', array(false, $jsparams));
+            return $text;
         }
         
         // get first player on the page
@@ -88,7 +123,7 @@ class filter_annoto extends moodle_text_filter {
             case "youtube":
                 $ytbidpattern = '%<iframe.*id=[\'"`]+([^\'"`]+)[\'"`].*<\/iframe>%i';
                 preg_match($ytbidpattern, $text, $ytbidmatch);
-                if (!empty($ytbidmatch) && !$playerfound) {
+                if (!empty($ytbidmatch)) {
                     $playerid = $ytbidmatch[1];
                 }
 
@@ -104,7 +139,7 @@ class filter_annoto extends moodle_text_filter {
             case "vimeo":
                 $vmidpattern = '%<iframe.*id=[\'"`]+([^\'"`]+)[\'"`].*<\/iframe>%i';
                 preg_match($vmidpattern, $text, $vmidmatch);
-                if (!empty($vmidmatch) && !$playerfound) {
+                if (!empty($vmidmatch)) {
                     $playerid = $vmidmatch[1];
                 }
 
@@ -123,7 +158,7 @@ class filter_annoto extends moodle_text_filter {
                 // It is later replaced by <div> with same id (by videjs javascript) so we can use the id as playerId.
                 $vjsidpattern = '%<video.*id=[\'"`]+([^\'"`]+)[\'"`].*<\/video>%i';
                 preg_match($vjsidpattern, $text, $vjsidmatch);
-                if (!empty($vjsidmatch) && !$playerfound) {
+                if (!empty($vjsidmatch)) {
                     $playerid = $vjsidmatch[1];
                 }
                 
@@ -137,35 +172,37 @@ class filter_annoto extends moodle_text_filter {
                 break;
         }
         
+        
+
+        // Prepare data for including with filter
+        $jsparams['playerType'] = $playertype;
+        $jsparams['playerId'] = $playerid;
+
+        $PAGE->requires->js_call_amd('filter_annoto/annoto-filter', 'init', array($playerfound, $jsparams));
+
+        return $text;
+    }
+
+    private function get_user_token($settings) {
+        global $USER, $PAGE;
+
+        // is user logged in or is guest
+        $userloggined = isloggedin();
+        $guestuser = isguestuser();
+
         // Provide page and js with data
         // get user's avatar
         $userpicture = new user_picture($USER);
         $userpicture->size = 150;
         $userpictureurl = $userpicture->get_url($PAGE);
 
-        // get activity data for mediaDetails
-        $cmtitle = $PAGE->cm->name;
-        $cmintro = ($page->intro) ? $page->intro : '';
-        $currentgroupid = '';
-        $currentgroupid = groups_get_activity_group($cm);  // this function returns active group in current activity (moste relevant option)
-        // $currentgroupid = groups_get_activity_allowed_groups($cm); // this function provides array of user's allowed groups in current course
-        $currentgroupname = '';
-        $currentgroupname = groups_get_group_name($currentgroupid);
-
-        // locale settings
-        if ($settings->locale == "auto") {
-            $lang = current_language();
-        } else {
-            $lang = $settings->locale;
-        }
-
         // Create and encode JWT for Annoto script
         require_once('JWT.php');                    // Load JWT lib
 
-        $issuedAt   = time();                       // Get current time
-        $expire     = $issuedAt + 60*20;            // Adding 20 minutes
+        $issuedat = time();                       // Get current time
+        $expire = $issuedat + 60 * 20;            // Adding 20 minutes
 
-        $payload= array(
+        $payload = array(
             "jti" => $USER->id,                     // User's id in Moodle
             "name" => fullname($USER),              // User's fullname in Moodle
             "email" => $USER->email,                // User's email
@@ -175,36 +212,14 @@ class filter_annoto extends moodle_text_filter {
         );
         
         $key = $settings->ssosecret;                // SSO secret from global settings        
-        $jwt = JWT::encode($payload, $key);         // Create and encode JWT for Annoto script
 
         // empty jwt for not loggined users and guests
         if (!$userloggined || $guestuser) {
             $jwt = '';
+        } else {
+            $jwt = JWT::encode($payload, $key);     // Create and encode JWT for Annoto script
         }
 
-        // Prepare data for including with filter
-        $jsParams = array(array(
-            'bootstrapUrl' => $scripturl,
-            'clientId' => $settings->clientid,
-            'userToken' => $jwt,
-            'position' => $settings->widgetposition,
-            'featureTab' => filter_var($settings->tabs, FILTER_VALIDATE_BOOLEAN),
-            'featureCTA' => filter_var($settings->cta, FILTER_VALIDATE_BOOLEAN),
-            'loginUrl' => $loginurl,
-            'logoutUrl' => $logouturl,
-            'playerType' => $playertype,
-            'playerId' => $playerid,
-            'mediaTitle' => $cmtitle,
-            'mediaDescription' => $cmintro,
-            'mediaGroupId' => $currentgroupid,
-            'mediaGroupTitle' => $currentgroupname,
-            'privateThread' => filter_var($settings->discussionscope, FILTER_VALIDATE_BOOLEAN),
-            'locale' => $lang,
-            'rtl' => filter_var(($lang === "he"), FILTER_VALIDATE_BOOLEAN),
-            'demoMode' => filter_var($settings->demomode, FILTER_VALIDATE_BOOLEAN),
-        ));
-        $PAGE->requires->js_call_amd('filter_annoto/annoto-filter', 'init', $jsParams);
-
-        return $text;
+        return $jwt;
     }
 }
