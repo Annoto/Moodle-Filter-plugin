@@ -199,6 +199,9 @@ class filter_annoto extends moodle_text_filter {
 
         // is user logged in or is guest
         $userloggined = isloggedin();
+        if (!$userloggined) {
+            return '';
+        }
         $guestuser = isguestuser();
 
         // Provide page and js with data
@@ -217,26 +220,17 @@ class filter_annoto extends moodle_text_filter {
             "jti" => $USER->id,                     // User's id in Moodle
             "name" => fullname($USER),              // User's fullname in Moodle
             "email" => $USER->email,                // User's email
-            "photoUrl" => $userpictureurl,          // User's avatar in Moodle
+            "photoUrl" => is_object($userpictureurl) ? $userpictureurl->out() : '',          // User's avatar in Moodle
             "iss" => $settings->clientid,           // clientID from global settings
             "exp" => $expire                        // JWT token expiration time
-        );
-        
-        $key = $settings->ssosecret;                // SSO secret from global settings        
+        );   
 
-        // empty jwt for not loggined users and guests
-        if (!$userloggined || $guestuser) {
-            $jwt = '';
-        } else {
-            $jwt = JWT::encode($payload, $key);     // Create and encode JWT for Annoto script
-        }
-
-        return $jwt;
+        return JWT::encode($payload, $settings->ssosecret);
     }
 
     private function get_lang() {
         global $PAGE, $SESSION, $COURSE, $USER;
-        
+
         if (isset($COURSE->lang) and !empty($COURSE->lang)) {
             return $COURSE->lang;
         }
