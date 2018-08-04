@@ -33,11 +33,23 @@ define(['jquery'], function($) {
 
             if (!playerfound) {
                 // TODO: implement front end detection for cases when filter unable to detect on backend (h5p)
-                this.logWarn('player not found by filter, looking at frontend')
-                return;
+                this.log('player not found by filter, looking at frontend')
+                return this.findPlayer();
             }
 
             require([params.bootstrapUrl], this.bootWidget.bind(this));
+        },
+        findPlayer() {
+            var h5p = $('iframe.h5p-iframe').first().get(0);
+            if (!h5p) {
+                return;
+            }
+            if (!h5p.id || h5p.id === '') {
+                h5p.id = this.params.defaultPlayerId;
+            }
+            this.params.playerId = h5p.id;
+            this.params.playerType = 'h5p';
+            require([this.params.bootstrapUrl], this.bootWidget.bind(this));
         },
         bootWidget: function() {
             var params = this.params;
@@ -107,6 +119,9 @@ define(['jquery'], function($) {
 			} else {
 				that.logWarn('Annoto not loaded');
 			}
+        },
+        log: function(msg, arg) {
+            console && console.debug('AnnotoFilterPlugin: ' + msg, arg || '');
         },
         logWarn: function(msg, arg) {
             console && console.warn('AnnotoFilterPlugin: ' + msg, arg || '');

@@ -41,7 +41,8 @@ class filter_annoto extends moodle_text_filter {
         $settings = get_config('filter_annoto');
         
         // set id of the video frame where script should be attached
-        $playerid = "annoto_default_player_id";
+        $defaultplayerid = 'annoto_default_player_id';
+        $playerid = $defaultplayerid;
         $playertype = '';
         $playerfound = false;
         $isglobalscope = filter_var($settings->scope, FILTER_VALIDATE_BOOLEAN);
@@ -96,6 +97,7 @@ class filter_annoto extends moodle_text_filter {
             'locale' => $lang,
             'rtl' => filter_var(($lang === "he"), FILTER_VALIDATE_BOOLEAN),
             'demoMode' => filter_var($settings->demomode, FILTER_VALIDATE_BOOLEAN),
+            'defaultPlayerId' => $defaultplayerid
         );
 
         // Do a quick check using strpos to avoid unnecessary work
