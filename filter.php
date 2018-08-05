@@ -52,7 +52,7 @@ class filter_annoto extends moodle_text_filter {
         // If scope is not Global, check if url is in access list or if tag is present
         if(!$isglobalscope) {
             // ACL
-            $acltext = ($settings->urlacl) ? $settings->urlacl : null ;
+            $acltext = ($settings->acl) ? $settings->acl : null ;
             $aclarr = preg_split("/\R/", $acltext);
             $iscourseinacl = false;
             $isurlinacl = false;
@@ -65,13 +65,7 @@ class filter_annoto extends moodle_text_filter {
                 $isurlinacl = in_array($pageurl, $aclarr);
             }
             $isaclmatch = ($iscourseinacl || $isurlinacl);
-            $PAGE->requires->js_call_amd('filter_annoto/annoto-filter', 'log', array('acl', array(
-                'isurlinacl' => $isurlinacl,
-                'iscourseinacl' => $iscourseinacl,
-                'isaclmatch' => $isaclmatch,
-                'courseId' => $PAGE->course->id,
-                'aclarr' => $aclarr,
-            )));
+
             if (!$isaclmatch and ($textisempty or !stripos($text, '<annoto>'))) {
                 return $text;
             }
@@ -230,17 +224,19 @@ class filter_annoto extends moodle_text_filter {
         $issuedat = time();                       // Get current time
         $expire = $issuedat + 60 * 20;            // Adding 20 minutes
 
-        //TODO: implemented getting scope of the user
-        
+        // Check if user is a moderator
+        $moderator = $this->is_moderator($settings);
+
         $payload = array(
             "jti" => $USER->id,                     // User's id in Moodle
             "name" => fullname($USER),              // User's fullname in Moodle
             "email" => $USER->email,                // User's email
             "photoUrl" => is_object($userpictureurl) ? $userpictureurl->out() : '',          // User's avatar in Moodle
             "iss" => $settings->clientid,           // clientID from global settings
-            "exp" => $expire                        // JWT token expiration time
+            "exp" => $expire,                       // JWT token expiration time
+            "scope" => ($moderator ? 'super-mod' : 'user'),
         );   
-
+        
         return JWT::encode($payload, $settings->ssosecret);
     }
 
@@ -257,5 +253,42 @@ class filter_annoto extends moodle_text_filter {
             return $USER->lang;
          }
          return current_language();
+    }
+
+    private function is_moderator($settings) {
+        global $COURSE, $USER;
+        
+        $reqcapabilities = array(
+            'moodle/comment:delete',
+            'moodle/question:add',
+            'moodle/notes:manage',
+            'moodle/course:manageactivities',
+            'moodle/analytics:listinsights',);
+
+        $coursecontext = context_course::instance($COURSE->id);
+
+        // check the minimum required capabilities
+        foreach($reqcapabilities as $cap) {
+            if (!has_capability($cap, $coursecontext)) {
+                return false;
+            }
+        }
+
+        // Check if user is site admin. don't consider site admin as moderator..
+        /* if (is_siteadmin($USER->id)) {
+            return true;
+        } */
+
+        // Check if user has a role as defined in settings
+        $userroles = get_user_roles($coursecontext, $USER->id, true);
+        $allowedroles = explode(',', $settings->moderatorroles);
+
+        foreach($userroles as $role) {
+            if (in_array($role->roleid, $allowedroles)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

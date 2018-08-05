@@ -26,34 +26,46 @@
 $string['filtername'] = 'Filter Annoto';
 $string['pluginname'] = 'Filter Annoto';
 
-// global settings
+// Application Setup
+$string['setupheading'] = 'Annoto Setup';
 $string['clientid'] = 'API key';
 $string['clientiddesc'] = 'ClientID is provided by Annoto (keep in secret)';
 $string['ssosecret'] = 'SSO secret';
 $string['ssosecretdesc'] = 'SSO secret is provided by Annoto (keep in secret)';
-$string['urlacl'] = 'ACL';
-$string['urlacldesc'] = 'List of allowed URLs or Course IDs (please, provide one per line)';
 $string['scripturl'] = 'Annoto\'s script URL';
 $string['scripturldesc'] = 'Provide Annoto\'s script URL here';
 $string['demomode'] = 'Demo';
-$string['demomodedesc'] = 'Toggle this if you don\'t have API key and SSO secret (on by default)';
-$string['widgetposition'] = 'Widget position';
-$string['widgetpositiondesc'] = 'Where to place the widget';
-$string['widgetpositionright'] = 'Right';
-$string['widgetpositionleft'] = 'Left';
-$string['tabs'] = 'Tabs';
-$string['tabsdesc'] = 'Toggle this if you want to use tabs in widget';
+$string['demomodedesc'] = 'Toggle this if you don\'t have API key and SSO secret (discussions will not be saved in demo mode)';
+
+// Application settings
+$string['appsetingsheading'] = 'Annoto Settings';
 $string['cta'] = 'Call To Action';
-$string['ctadesc'] = 'Toggle this if you want to use call to action in widget';
+$string['ctadesc'] = 'Toggle this if you want to use call to actions';
 $string['locale'] = 'Locale';
-$string['localedesc'] = 'Choose locale for widget';
-$string['localeauto'] = 'Auto (by default)';
+$string['localedesc'] = 'Choose language (Auto will set per page and course based on Course and User preferences)';
+$string['localeauto'] = 'Auto Detect';
 $string['localeen'] = 'English';
 $string['localehe'] = 'Hebrew';
-$string['scope'] = 'Global Scope';
-$string['scopedesc'] = 'Choose where you want to allow Annoto plugin: check - all site (by default), uncheck - allow only for ACL list and for allowed pages using Annoto Atto plugin';
 $string['discussionscope'] = 'Discussions Scope';
 $string['discussionscopedesc'] = 'Choose scope of Annoto discussions: private per course (default) or site wide (if same video is used in multiple courses the discussion will be pulic across courses)';
 $string['discussionscopesitewide'] = 'Site wide';
 $string['discussionscopeprivate'] = 'Private per course';
+$string['moderatorroles'] = 'Moderator Roles';
+$string['moderatorrolesdesc'] = 'Specify Who is allowed to moderate the discussions (the selected roles should have the following capabilities as a minimum: moodle/comment:delete, moodle/notes:manage, moodle/question:add, moodle/course:manageactivities, moodle/analytics:listinsights)';
+
+// UX preferences
+$string['appuxheading'] = 'Annoto UX Preferences';
+$string['widgetposition'] = 'Discussion Widget position';
+$string['widgetpositiondesc'] = 'Where to place the Discussion widget relative to the player';
+$string['widgetpositionright'] = 'Right';
+$string['widgetpositionleft'] = 'Left';
+$string['tabs'] = 'Tabs';
+$string['tabsdesc'] = 'Enable this if you want to use tabs in the discussion widget instead of the menu';
+
+// ACL and scope
+$string['aclheading'] = 'Annoto ACL and application Scope';
+$string['scope'] = 'All site Scope';
+$string['scopedesc'] = 'Choose where you want to allow Annoto plugin: check - all site, uncheck - allow only for ACL list and for allowed pages using Annoto Atto plugin';
+$string['acl'] = 'ACL';
+$string['acldesc'] = 'List of allowed URLs or Course IDs (please, provide one per line)';
 
