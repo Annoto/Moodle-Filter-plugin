@@ -68,6 +68,12 @@ define(['jquery'], function($) {
                     tabs: params.featureTab,
                     cta: params.featureCTA,
                 },
+                width: {
+                    max: 400,
+                },
+                align: {
+                    vertical: params.alignVertical,
+                },
                 ux :{
                     ssoAuthRequestHandle: function() {
                         window.location.replace(params.loginUrl)

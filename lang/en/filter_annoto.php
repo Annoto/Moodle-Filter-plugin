@@ -57,8 +57,12 @@ $string['moderatorrolesdesc'] = 'Specify Who is allowed to moderate the discussi
 $string['appuxheading'] = 'Annoto UX Preferences';
 $string['widgetposition'] = 'Discussion Widget position';
 $string['widgetpositiondesc'] = 'Where to place the Discussion widget relative to the player';
-$string['widgetpositionright'] = 'Right';
-$string['widgetpositionleft'] = 'Left';
+$string['positionright'] = 'Right';
+$string['positionleft'] = 'Left';
+$string['positiontopright'] = 'Top Right';
+$string['positiontopleft'] = 'Top Left';
+$string['positionbottomright'] = 'Bottom Right';
+$string['positionbottomleft'] = 'Bottom Left';
 $string['tabs'] = 'Tabs';
 $string['tabsdesc'] = 'Enable this if you want to use tabs in the discussion widget instead of the menu';
 

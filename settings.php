@@ -77,8 +77,12 @@ defined('MOODLE_INTERNAL') || die;
 
     // Widget position
     $settings->add(new admin_setting_configselect('filter_annoto/widgetposition', get_string('widgetposition','filter_annoto'),
-        get_string('widgetpositiondesc', 'filter_annoto'), 'right', array(  'right' => get_string('widgetpositionright','filter_annoto'),
-                                                                            'left' => get_string('widgetpositionleft','filter_annoto'))));
+        get_string('widgetpositiondesc', 'filter_annoto'), 'topright', array(   'right' => get_string('positionright','filter_annoto'),
+                                                                                'left' => get_string('positionleft','filter_annoto'),
+                                                                                'topright' => get_string('positiontopright','filter_annoto'),
+                                                                                'topleft' => get_string('positiontopleft','filter_annoto'),
+                                                                                'bottomright' => get_string('positionbottomright','filter_annoto'),
+                                                                                'bottomleft' => get_string('positionbottomleft','filter_annoto'))));
 
     // Tabs
     $settings->add(new admin_setting_configcheckbox('filter_annoto/tabs', get_string('tabs','filter_annoto'),

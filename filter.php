@@ -88,19 +88,30 @@ class filter_annoto extends moodle_text_filter {
             $courseSummary = $PAGE->course->summary;
         }
 
-
         // locale settings
         if ($settings->locale == "auto") {
             $lang = $this->get_lang();
         } else {
             $lang = $settings->locale;
         }
+        $widgetposition = 'right';
+        $widgetverticalalign = 'center';
+        if (stripos($settings->widgetposition, 'left') !== false) {
+            $widgetposition = 'left';
+        }
+        if (stripos($settings->widgetposition, 'top') !== false) {
+            $widgetverticalalign = 'top';
+        }
+        if (stripos($settings->widgetposition, 'bottom') !== false) {
+            $widgetverticalalign = 'bottom';
+        }
 
         $jsparams = array(
             'bootstrapUrl' => $settings->scripturl,
             'clientId' => $settings->clientid,
             'userToken' => $this->get_user_token($settings),
-            'position' => $settings->widgetposition,
+            'position' => $widgetposition,
+            'alignVertical' => $widgetverticalalign,
             'featureTab' => filter_var($settings->tabs, FILTER_VALIDATE_BOOLEAN),
             'featureCTA' => filter_var($settings->cta, FILTER_VALIDATE_BOOLEAN),
             'loginUrl' => $loginurl,
