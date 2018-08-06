@@ -83,7 +83,11 @@ defined('MOODLE_INTERNAL') || die;
                                                                                 'topleft' => get_string('positiontopleft','filter_annoto'),
                                                                                 'bottomright' => get_string('positionbottomright','filter_annoto'),
                                                                                 'bottomleft' => get_string('positionbottomleft','filter_annoto'))));
-
+    // Widget overlay mode
+    $settings->add(new admin_setting_configselect('filter_annoto/widgetoverlay', get_string('widgetoverlay','filter_annoto'),
+        get_string('widgetoverlaydesc', 'filter_annoto'), 'auto', array(    'auto' => get_string('overlayauto','filter_annoto'),
+                                                                            'inner' => get_string('overlayinner','filter_annoto'),
+                                                                            'outer' => get_string('overlayouter','filter_annoto'))));
     // Tabs
     $settings->add(new admin_setting_configcheckbox('filter_annoto/tabs', get_string('tabs','filter_annoto'),
         get_string('tabsdesc', 'filter_annoto'), 'false', 'true', 'false'));

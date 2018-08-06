@@ -32,7 +32,6 @@ define(['jquery'], function($) {
             }
 
             if (!playerfound) {
-                // TODO: implement front end detection for cases when filter unable to detect on backend (h5p)
                 this.log('player not found by filter, looking at frontend')
                 return this.findPlayer();
             }
@@ -61,6 +60,14 @@ define(['jquery'], function($) {
         bootWidget: function() {
             var params = this.params;
             var that = this;
+            var nonOverlayTimelinePlayers = ['youtube', 'vimeo'];
+            var innerAlignPlayers = ['h5p'];
+            var horizontalAlign = 'element_edge';
+            if (!params.widgetOverlay || params.widgetOverlay === 'auto') {
+                horizontalAlign = (innerAlignPlayers.indexOf(params.playerType) !== -1) ? 'inner' : 'element_edge'
+            } else if (params.widgetOverlay === 'inner') {
+                horizontalAlign = 'inner';
+            }
             var config = {
                 clientId: params.clientId,
                 position: params.position,
@@ -73,6 +80,7 @@ define(['jquery'], function($) {
                 },
                 align: {
                     vertical: params.alignVertical,
+                    horizontal: horizontalAlign,
                 },
                 ux :{
                     ssoAuthRequestHandle: function() {
@@ -101,7 +109,7 @@ define(['jquery'], function($) {
                             },
                         },
                         timeline: {
-                            overlayVideo: false
+                            overlayVideo: (nonOverlayTimelinePlayers.indexOf(params.playerType) === -1),
                         },
                     }
                 ],

@@ -55,7 +55,7 @@ $string['moderatorrolesdesc'] = 'Specify Who is allowed to moderate the discussi
 
 // UX preferences
 $string['appuxheading'] = 'Annoto UX Preferences';
-$string['widgetposition'] = 'Discussion Widget position';
+$string['widgetposition'] = 'Widget position';
 $string['widgetpositiondesc'] = 'Where to place the Discussion widget relative to the player';
 $string['positionright'] = 'Right';
 $string['positionleft'] = 'Left';
@@ -65,6 +65,11 @@ $string['positionbottomright'] = 'Bottom Right';
 $string['positionbottomleft'] = 'Bottom Left';
 $string['tabs'] = 'Tabs';
 $string['tabsdesc'] = 'Enable this if you want to use tabs in the discussion widget instead of the menu';
+$string['widgetoverlay'] = 'Overlay Mode';
+$string['widgetoverlaydesc'] = 'Chose the mode of widget overlay. Can be on top (inside) of player or outside of player. Auto will select the mode based on player type';
+$string['overlayauto'] = 'Auto';
+$string['overlayinner'] = 'On top of player';
+$string['overlayouter'] = 'Next to player';
 
 // ACL and scope
 $string['aclheading'] = 'Annoto ACL and application Scope';
