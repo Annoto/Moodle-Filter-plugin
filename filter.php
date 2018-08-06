@@ -66,7 +66,7 @@ class filter_annoto extends moodle_text_filter {
             }
             $isaclmatch = ($iscourseinacl || $isurlinacl);
 
-            if (!$isaclmatch and ($textisempty or !stripos($text, '<annoto>'))) {
+            if (!$isaclmatch and ($textisempty or (stripos($text, '<annoto>') === false))) {
                 return $text;
             }
         }
@@ -118,7 +118,7 @@ class filter_annoto extends moodle_text_filter {
         );
 
         // Do a quick check using strpos to avoid unnecessary work
-        if ($textisempty or !(stripos($text, '</video>') or stripos($text, '</iframe>'))) {
+        if ($textisempty or ((stripos($text, '</video>') === false) and (stripos($text, '</iframe>') === false))) {
             // Give the front end script chance to find the player in cases when filter cannot
             $PAGE->requires->js_call_amd('filter_annoto/annoto-filter', 'init', array(false, $jsparams));
             return $text;
@@ -257,7 +257,7 @@ class filter_annoto extends moodle_text_filter {
 
     private function is_moderator($settings) {
         global $COURSE, $USER;
-        
+
         $reqcapabilities = array(
             'moodle/comment:delete',
             'moodle/question:add',
