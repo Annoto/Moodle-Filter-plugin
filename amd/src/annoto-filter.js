@@ -37,9 +37,9 @@ define(['jquery'], function($) {
                 return this.findPlayer();
             }
 
-            require([params.bootstrapUrl], this.bootWidget.bind(this));
+            this.bootstrap();
         },
-        findPlayer() {
+        findPlayer: function() {
             var h5p = $('iframe.h5p-iframe').first().get(0);
             if (!h5p) {
                 return;
@@ -49,7 +49,14 @@ define(['jquery'], function($) {
             }
             this.params.playerId = h5p.id;
             this.params.playerType = 'h5p';
-            require([this.params.bootstrapUrl], this.bootWidget.bind(this));
+            this.bootstrap();
+        },
+        bootstrap: function() {
+            if (this.bootsrapDone) {
+                return;
+            }
+            this.bootsrapDone = true;
+            return require([this.params.bootstrapUrl], this.bootWidget.bind(this));
         },
         bootWidget: function() {
             var params = this.params;
@@ -127,7 +134,7 @@ define(['jquery'], function($) {
             console && console.warn('AnnotoFilterPlugin: ' + msg, arg || '');
         },
         logError: function(msg, err) {
-            console && console.error('AnnotoFilterPlugin: ' + msg, arg || '');
+            console && console.error('AnnotoFilterPlugin: ' + msg, err || '');
         }
     };
 });
