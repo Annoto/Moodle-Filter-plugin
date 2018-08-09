@@ -86,9 +86,9 @@ define(['jquery'], function($) {
                     ssoAuthRequestHandle: function() {
                         window.location.replace(params.loginUrl)
                     },
-                    logoutRequestHandle: function() {
+                    /* logoutRequestHandle: function() {
                         window.location.replace(params.logoutUrl)
-                    }
+                    } */
                 },
                 widgets: [
                     {
