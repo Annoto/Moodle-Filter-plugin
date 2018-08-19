@@ -113,7 +113,7 @@ class filter_annoto extends moodle_text_filter {
             'position' => $widgetposition,
             'alignVertical' => $widgetverticalalign,
             'widgetOverlay' => $settings->widgetoverlay,
-            'featureTab' => !empty($settings->tabs) ? filter_var($settings->tabs, FILTER_VALIDATE_BOOLEAN) : false,
+            'featureTab' => !empty($settings->tabs) ? filter_var($settings->tabs, FILTER_VALIDATE_BOOLEAN) : true,
             'featureCTA' => !empty($settings->cta) ? filter_var($settings->cta, FILTER_VALIDATE_BOOLEAN) : false,
             'loginUrl' => $loginurl,
             'logoutUrl' => $logouturl,

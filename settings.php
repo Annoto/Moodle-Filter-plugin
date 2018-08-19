@@ -90,14 +90,14 @@ defined('MOODLE_INTERNAL') || die;
                                                                             'outer' => get_string('overlayouter','filter_annoto'))));
     // Tabs
     $settings->add(new admin_setting_configcheckbox('filter_annoto/tabs', get_string('tabs','filter_annoto'),
-        get_string('tabsdesc', 'filter_annoto'), 'false', 'true', 'false'));
+        get_string('tabsdesc', 'filter_annoto'), 'true', 'true', 'false'));
 
 // ACL and scope
     $settings->add(new admin_setting_heading('filter_annoto/aclheading', get_string('aclheading', 'filter_annoto'), ''));
 
     // Global Scope
     $settings->add(new admin_setting_configcheckbox('filter_annoto/scope', get_string('scope','filter_annoto'),
-        get_string('scopedesc', 'filter_annoto'), 'true', 'true', 'false'));
+        get_string('scopedesc', 'filter_annoto'), 'false', 'true', 'false'));
 
     // URL ACL
     $settings->add(new admin_setting_configtextarea('filter_annoto/acl', get_string('acl','filter_annoto'),
