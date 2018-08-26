@@ -126,7 +126,8 @@ class filter_annoto extends moodle_text_filter {
             'locale' => $lang,
             'rtl' => filter_var((substr($lang, 0, 2) === "he"), FILTER_VALIDATE_BOOLEAN),
             'demoMode' => filter_var($settings->demomode, FILTER_VALIDATE_BOOLEAN),
-            'defaultPlayerId' => $defaultplayerid
+            'defaultPlayerId' => $defaultplayerid,
+            'zIndex' => !empty($settings->zindex) ? filter_var($settings->zindex, FILTER_VALIDATE_INT) : 100,
         );
 
         // Do a quick check using strpos to avoid unnecessary work

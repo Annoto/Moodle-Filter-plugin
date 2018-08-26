@@ -92,6 +92,10 @@ defined('MOODLE_INTERNAL') || die;
     $settings->add(new admin_setting_configcheckbox('filter_annoto/tabs', get_string('tabs','filter_annoto'),
         get_string('tabsdesc', 'filter_annoto'), 'true', 'true', 'false'));
 
+    // Annoto zindex
+    $settings->add(new admin_setting_configtext('filter_annoto/zindex', get_string('zindex','filter_annoto'),
+        get_string('zindexdesc', 'filter_annoto'), 100, PARAM_INT));
+
 // ACL and scope
     $settings->add(new admin_setting_heading('filter_annoto/aclheading', get_string('aclheading', 'filter_annoto'), ''));
 

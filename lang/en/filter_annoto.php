@@ -70,6 +70,8 @@ $string['widgetoverlaydesc'] = 'Chose the mode of widget overlay. Can be on top 
 $string['overlayauto'] = 'Auto';
 $string['overlayinner'] = 'On top of player';
 $string['overlayouter'] = 'Next to player';
+$string['zindex'] = 'Stack order';
+$string['zindexdesc'] = 'Choose the overlay stacking order (z-index) of the discussion widget';
 
 // ACL and scope
 $string['aclheading'] = 'Annoto ACL and application Scope';

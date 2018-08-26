@@ -90,6 +90,7 @@ define(['jquery'], function($) {
                         window.location.replace(params.logoutUrl)
                     } */
                 },
+                zIndex: params.zIndex ? params.zIndex : 100,
                 widgets: [
                     {
                         player: {
