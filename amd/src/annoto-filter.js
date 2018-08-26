@@ -76,7 +76,7 @@ define(['jquery'], function($) {
                     cta: params.featureCTA,
                 },
                 width: {
-                    max: 400,
+                    max: (horizontalAlign === 'inner') ? 320 : 360,
                 },
                 align: {
                     vertical: params.alignVertical,
