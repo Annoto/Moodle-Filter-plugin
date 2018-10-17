@@ -165,6 +165,18 @@ class filter_annoto extends moodle_text_filter {
                     $text = preg_replace($youtubepattern, "<iframe id='".$playerid."'$2", $text, 1);
                     $playertype = "youtube";
                     $playerfound = true;
+
+                    // Make sure there is enablejsapi=1 query param
+                    preg_match('%<iframe[^>]+src=([\'"])(.*)\1%isU', $text, $ytsrcmatches);
+                    $ytsrc = $ytsrcmatches[2];
+                    if ((stripos($ytsrc, 'youtube') !== false) and (false === stripos($ytsrc, 'enablejsapi'))) {
+                        if(false !== strpos($ytsrc, '?')) {
+                            $ytsrc.= '&enablejsapi=1';
+                        } else {
+                            $ytsrc.= '?enablejsapi=1';
+                        }
+                        $text = preg_replace('%' . preg_quote($ytsrcmatches[2]) . '%', $ytsrc, $text, 1);
+                    }
                 }
                 break;
 
