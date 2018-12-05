@@ -32,22 +32,41 @@ define(['jquery'], function($) {
             }
 
             if (!playerfound) {
-                this.log('player not found by filter, looking at frontend')
+                this.log('player not found by filter, looking at frontend');
                 return this.findPlayer();
             }
 
             this.bootstrap();
         },
         findPlayer: function() {
+
             var h5p = $('iframe.h5p-iframe').first().get(0);
-            if (!h5p) {
+            var youtube = $('iframe[src*="youtube.com"]').first().get(0);
+            var vimeo = $('iframe[src*="vimeo.com"]').first().get(0);
+            var videotag = $('video').first().get(0);
+            console.log(youtube);
+            
+            if (h5p) {
+                annotoplayer = h5p;
+                this.params.playerType = 'h5p';
+            } else if (videotag) {
+                annotoplayer = videotag;
+                this.params.playerType = 'videojs';
+            } else if (youtube) {
+                annotoplayer = youtube;
+                this.params.playerType = 'youtube';
+            } else if (vimeo) {
+                annotoplayer = vimeo;
+                this.params.playerType = 'vimeo';
+            } else {
                 return;
             }
-            if (!h5p.id || h5p.id === '') {
-                h5p.id = this.params.defaultPlayerId;
+
+            if (!annotoplayer.id || annotoplayer.id === '') {
+                annotoplayer.id = this.params.defaultPlayerId;
             }
-            this.params.playerId = h5p.id;
-            this.params.playerType = 'h5p';
+            this.params.playerId = annotoplayer.id;
+            
             this.bootstrap();
         },
         bootstrap: function() {

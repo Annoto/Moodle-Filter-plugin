@@ -32,10 +32,11 @@ class filter_annoto extends moodle_text_filter {
     public function filter($text, array $options = array()) {
         global $CFG, $PAGE;
 
+        /* commented below to trigger filter on the course page for labels */
         // check if we run on course page
-        if (!is_object($PAGE->cm)) {
-            return $text;
-        }
+        // if (!is_object($PAGE->cm)) {
+        //     return $text;
+        // }
 
         // Get plugin global settings
         $settings = get_config('filter_annoto');
@@ -136,7 +137,7 @@ class filter_annoto extends moodle_text_filter {
             $PAGE->requires->js_call_amd('filter_annoto/annoto-filter', 'init', array(false, $jsparams));
             return $text;
         }
-        
+
         // get first player on the page
         if ($youtubepos = stripos($text, 'youtu')) {
             $pplayers['youtube'] = $youtubepos;
@@ -288,7 +289,8 @@ class filter_annoto extends moodle_text_filter {
             'moodle/question:add',
             'moodle/notes:manage',
             'moodle/course:manageactivities',
-            'moodle/analytics:listinsights',);
+            //'moodle/analytics:listinsights', // Moodle 3.3 doesn't have this capability yet (only since Moodle 3.4)
+        );
 
         $coursecontext = context_course::instance($COURSE->id);
 
