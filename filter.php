@@ -76,8 +76,8 @@ class filter_annoto extends moodle_text_filter {
         $loginurl = $CFG->wwwroot . "/login/index.php";
         $logouturl = $CFG->wwwroot . "/login/logout.php?sesskey=" . sesskey();
         // get activity data for mediaDetails
-        $cmtitle = $PAGE->cm->name;
-        $cmintro = ($PAGE->activityrecord->intro) ? $PAGE->activityrecord->intro : '';
+        $cmtitle = isset($PAGE->cm->name) ? $PAGE->cm->name : '';                           // set empty value, if user is on the course page
+        $cmintro = isset($PAGE->activityrecord->intro) ? $PAGE->activityrecord->intro : ''; // set empty value, if user is on the course page
         // $currentgroupid = groups_get_activity_group($PAGE->cm);  // this function returns active group in current activity (most relevant option)
         // $currentgroupid = groups_get_activity_allowed_groups($PAGE->cm); // this function provides array of user's allowed groups in current course
         // $currentgroupname = groups_get_group_name($currentgroupid);
