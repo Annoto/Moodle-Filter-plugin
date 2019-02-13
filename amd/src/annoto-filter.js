@@ -45,7 +45,7 @@ define(['jquery'], function($) {
             var vimeo = $('iframe[src*="vimeo.com"]').first().get(0);
             var videotag = $('video').first().get(0);
             console.log(youtube);
-            
+
             if (h5p) {
                 annotoplayer = h5p;
                 this.params.playerType = 'h5p';
@@ -66,7 +66,7 @@ define(['jquery'], function($) {
                 annotoplayer.id = this.params.defaultPlayerId;
             }
             this.params.playerId = annotoplayer.id;
-            
+
             this.bootstrap();
         },
         bootstrap: function() {
@@ -110,56 +110,54 @@ define(['jquery'], function($) {
                     } */
                 },
                 zIndex: params.zIndex ? params.zIndex : 100,
-                widgets: [
-                    {
-                        player: {
-                            type: params.playerType,
-                            element: params.playerId,
-                            mediaDetails : function () {
-                                return {
-                                    title : params.mediaTitle,
-                                    description: params.mediaDescription,
-                                    group: {
-                                        id: params.mediaGroupId,
-                                        type: 'playlist',
-                                        title: params.mediaGroupTitle,
-                                        privateThread: params.privateThread,
-                                    }
-                                };
-                            },
+                widgets: [{
+                    player: {
+                        type: params.playerType,
+                        element: params.playerId,
+                        mediaDetails : function () {
+                            return {
+                                title : params.mediaTitle,
+                                description: params.mediaDescription,
+                                group: {
+                                    id: params.mediaGroupId,
+                                    type: 'playlist',
+                                    title: params.mediaGroupTitle,
+                                    privateThread: params.privateThread,
+                                }
+                            };
                         },
-                        timeline: {
-                            overlayVideo: (nonOverlayTimelinePlayers.indexOf(params.playerType) === -1),
-                        },
-                    }
-                ],
+                    },
+                    timeline: {
+                        overlayVideo: (nonOverlayTimelinePlayers.indexOf(params.playerType) === -1),
+                    },
+                }],
                 demoMode: params.demoMode,
                 rtl: params.rtl,
                 locale: params.locale,
             };
 
             if (window.Annoto) {
-				window.Annoto.on('ready', function (api) {
-				var jwt = params.userToken;
-				if (api && jwt && jwt !== '') {
-					api.auth(jwt).catch(function() {
-						that.logError('Annoto SSO auth error');
-					});
-				}
-			});
-			if (params.playerType === 'videojs' && window.requirejs) {
-				window.require(['media_videojs/video-lazy'], function(vjs) {
-					config.widgets[0].player.params = {
-						videojs: vjs
-					};
-					window.Annoto.boot(config);
-				});
-			} else {
-				window.Annoto.boot(config);
-			}
-			} else {
-				that.logWarn('Annoto not loaded');
-			}
+                window.Annoto.on('ready', function (api) {
+                    var jwt = params.userToken;
+                    if (api && jwt && jwt !== '') {
+                        api.auth(jwt).catch(function() {
+                            that.logError('Annoto SSO auth error');
+                        });
+                    }
+                });
+                if (params.playerType === 'videojs' && window.requirejs) {
+                    window.require(['media_videojs/video-lazy'], function(vjs) {
+                        config.widgets[0].player.params = {
+                            videojs: vjs
+                        };
+                        window.Annoto.boot(config);
+                    });
+                } else {
+                    window.Annoto.boot(config);
+                }
+            } else {
+                that.logWarn('Annoto not loaded');
+            }
         },
         log: function(msg, arg) {
             console && console.debug('AnnotoFilterPlugin: ' + msg, arg || '');

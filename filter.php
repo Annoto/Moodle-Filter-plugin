@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -25,23 +24,14 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-// error_reporting(E_ALL);
-// ini_set("display_errors", 1);
-
 class filter_annoto extends moodle_text_filter {
     public function filter($text, array $options = array()) {
         global $CFG, $PAGE;
 
-        /* commented below to trigger filter on the course page for labels */
-        // check if we run on course page
-        // if (!is_object($PAGE->cm)) {
-        //     return $text;
-        // }
-
-        // Get plugin global settings
+        // Get plugin global settings.
         $settings = get_config('filter_annoto');
-        
-        // set id of the video frame where script should be attached
+
+        // Set id of the video frame where script should be attached.
         $defaultplayerid = 'annoto_default_player_id';
         $playerid = $defaultplayerid;
         $playertype = '';
@@ -50,10 +40,10 @@ class filter_annoto extends moodle_text_filter {
 
         $textisempty = (!is_string($text) or empty($text));
 
-        // If scope is not Global, check if url is in access list or if tag is present
-        if(!$isglobalscope) {
-            // ACL
-            $acltext = ($settings->acl) ? $settings->acl : null ;
+        // If scope is not Global, check if url is in access list or if tag is present.
+        if (!$isglobalscope) {
+            // ACL.
+            $acltext = ($settings->acl) ? $settings->acl : null;
             $aclarr = preg_split("/\R/", $acltext);
             $iscourseinacl = false;
             $isurlinacl = false;
@@ -71,25 +61,22 @@ class filter_annoto extends moodle_text_filter {
                 return $text;
             }
         }
-        
-        // get login, logout urls
+
+        // Get login, logout urls.
         $loginurl = $CFG->wwwroot . "/login/index.php";
         $logouturl = $CFG->wwwroot . "/login/logout.php?sesskey=" . sesskey();
-        // get activity data for mediaDetails
-        $cmtitle = isset($PAGE->cm->name) ? $PAGE->cm->name : '';                           // set empty value, if user is on the course page
-        $cmintro = isset($PAGE->activityrecord->intro) ? $PAGE->activityrecord->intro : ''; // set empty value, if user is on the course page
-        // $currentgroupid = groups_get_activity_group($PAGE->cm);  // this function returns active group in current activity (most relevant option)
-        // $currentgroupid = groups_get_activity_allowed_groups($PAGE->cm); // this function provides array of user's allowed groups in current course
-        // $currentgroupname = groups_get_group_name($currentgroupid);
+        // Get activity data for mediaDetails.
+        $cmtitle = $PAGE->cm->name ?? ''; // Set empty value, if user is on the course page.
+        $cmintro = $PAGE->activityrecord->intro ?? ''; // Set empty value, if user is on the course page.
 
-        // get course info
+        // Get course info.
         if (is_object($PAGE->course)) {
-            $courseId = $PAGE->course->id;
-            $courseName = $PAGE->course->fullname;
-            $courseSummary = $PAGE->course->summary;
+            $courseid = $PAGE->course->id;
+            $coursename = $PAGE->course->fullname;
+            $coursesummary = $PAGE->course->summary;
         }
 
-        // locale settings
+        // Locale settings.
         if ($settings->locale == "auto") {
             $lang = $this->get_lang();
         } else {
@@ -120,9 +107,9 @@ class filter_annoto extends moodle_text_filter {
             'logoutUrl' => $logouturl,
             'mediaTitle' => $cmtitle,
             'mediaDescription' => $cmintro,
-            'mediaGroupId' => $courseId,
-            'mediaGroupTitle' => $courseName,
-            'mediaGroupDescription' => $courseSummary,
+            'mediaGroupId' => $courseid,
+            'mediaGroupTitle' => $coursename,
+            'mediaGroupDescription' => $coursesummary,
             'privateThread' => filter_var($settings->discussionscope, FILTER_VALIDATE_BOOLEAN),
             'locale' => $lang,
             'rtl' => filter_var((substr($lang, 0, 2) === "he"), FILTER_VALIDATE_BOOLEAN),
@@ -131,18 +118,18 @@ class filter_annoto extends moodle_text_filter {
             'zIndex' => !empty($settings->zindex) ? filter_var($settings->zindex, FILTER_VALIDATE_INT) : 100,
         );
 
-        // Do a quick check using strpos to avoid unnecessary work
+        // Do a quick check using strpos to avoid unnecessary work.
         if ($textisempty or ((stripos($text, '</video>') === false) and (stripos($text, '</iframe>') === false))) {
-            // Give the front end script chance to find the player in cases when filter cannot
+            // Give the front end script chance to find the player in cases when filter cannot.
             $PAGE->requires->js_call_amd('filter_annoto/annoto-filter', 'init', array(false, $jsparams));
             return $text;
         }
 
-        // get first player on the page
+        // Get first player on the page.
         if ($youtubepos = stripos($text, 'youtu')) {
             $pplayers['youtube'] = $youtubepos;
         }
-        if ($vimeopos = stripos($text, 'vimeo')){
+        if ($vimeopos = stripos($text, 'vimeo')) {
             $pplayers['vimeo'] = $vimeopos;
         }
         if ($videojspos = stripos($text, 'mediaplugin_videojs')) {
@@ -151,7 +138,7 @@ class filter_annoto extends moodle_text_filter {
         $firstplayerarr = array_keys($pplayers, min($pplayers));
         $firstplayer = $firstplayerarr[0];
 
-        // attach annoto script to the first found player
+        // Attach annoto script to the first found player.
         switch ($firstplayer) {
             case "youtube":
                 $ytbidpattern = '%<iframe.*id=[\'"`]+([^\'"`]+)[\'"`].*<\/iframe>%i';
@@ -167,14 +154,14 @@ class filter_annoto extends moodle_text_filter {
                     $playertype = "youtube";
                     $playerfound = true;
 
-                    // Make sure there is enablejsapi=1 query param
+                    // Make sure there is enablejsapi=1 query param.
                     preg_match('%<iframe[^>]+src=([\'"])(.*)\1%isU', $text, $ytsrcmatches);
                     $ytsrc = $ytsrcmatches[2];
                     if ((stripos($ytsrc, 'youtube') !== false) and (false === stripos($ytsrc, 'enablejsapi'))) {
-                        if(false !== strpos($ytsrc, '?')) {
-                            $ytsrc.= '&enablejsapi=1';
+                        if (false !== strpos($ytsrc, '?')) {
+                            $ytsrc .= '&enablejsapi=1';
                         } else {
-                            $ytsrc.= '?enablejsapi=1';
+                            $ytsrc .= '?enablejsapi=1';
                         }
                         $text = preg_replace('%' . preg_quote($ytsrcmatches[2]) . '%', $ytsrc, $text, 1);
                     }
@@ -198,7 +185,7 @@ class filter_annoto extends moodle_text_filter {
                 break;
 
             case "videojs":
-                // videojs media plugin always uses <video> html tag when embedding videos even if it's YouTube link
+                // Videojs media plugin always uses <video> html tag when embedding videos even if it's YouTube link.
                 // When the filter examins the page it sees the origin <video> videojs media plugin uses.
                 // It is later replaced by <div> with same id (by videjs javascript) so we can use the id as playerId.
                 $vjsidpattern = '%<video.*id=[\'"`]+([^\'"`]+)[\'"`].*<\/video>%i';
@@ -206,7 +193,7 @@ class filter_annoto extends moodle_text_filter {
                 if (!empty($vjsidmatch)) {
                     $playerid = $vjsidmatch[1];
                 }
-                
+
                 $vjspattern = "%(<video)%i";
                 preg_match($vjspattern, $text, $vjspmatch);
                 if (!empty($vjspmatch)) {
@@ -216,10 +203,8 @@ class filter_annoto extends moodle_text_filter {
                 }
                 break;
         }
-        
-        
 
-        // Prepare data for including with filter
+        // Prepare data for including with filter.
         $jsparams['playerType'] = $playertype;
         $jsparams['playerId'] = $playerid;
 
@@ -231,38 +216,38 @@ class filter_annoto extends moodle_text_filter {
     private function get_user_token($settings) {
         global $USER, $PAGE;
 
-        // is user logged in or is guest
+        // Is user logged in or is guest.
         $userloggined = isloggedin();
         if (!$userloggined) {
             return '';
         }
         $guestuser = isguestuser();
 
-        // Provide page and js with data
-        // get user's avatar
+        // Provide page and js with data.
+        // Get user's avatar.
         $userpicture = new user_picture($USER);
         $userpicture->size = 150;
         $userpictureurl = $userpicture->get_url($PAGE);
 
-        // Create and encode JWT for Annoto script
-        require_once('JWT.php');                    // Load JWT lib
+        // Create and encode JWT for Annoto script.
+        require_once('JWT.php');                    // Load JWT lib.
 
-        $issuedat = time();                       // Get current time
-        $expire = $issuedat + 60 * 20;            // Adding 20 minutes
+        $issuedat = time();                        // Get current time.
+        $expire = $issuedat + 60 * 20;             // Adding 20 minutes.
 
-        // Check if user is a moderator
+        // Check if user is a moderator.
         $moderator = $this->is_moderator($settings);
 
         $payload = array(
-            "jti" => $USER->id,                     // User's id in Moodle
-            "name" => fullname($USER),              // User's fullname in Moodle
-            "email" => $USER->email,                // User's email
-            "photoUrl" => is_object($userpictureurl) ? $userpictureurl->out() : '',          // User's avatar in Moodle
-            "iss" => $settings->clientid,           // clientID from global settings
-            "exp" => $expire,                       // JWT token expiration time
+            "jti" => $USER->id,                     // User's id in Moodle.
+            "name" => fullname($USER),              // User's fullname in Moodle.
+            "email" => $USER->email,                // User's email.
+            "photoUrl" => is_object($userpictureurl) ? $userpictureurl->out() : '',  // User's avatar in Moodle.
+            "iss" => $settings->clientid,           // ClientID from global settings.
+            "exp" => $expire,                       // JWT token expiration time.
             "scope" => ($moderator ? 'super-mod' : 'user'),
-        );   
-        
+        );
+
         return JWT::encode($payload, $settings->ssosecret);
     }
 
@@ -277,7 +262,7 @@ class filter_annoto extends moodle_text_filter {
         }
         if (isset($USER->lang) and !empty($USER->lang)) {
             return $USER->lang;
-         }
+        }
          return current_language();
     }
 
@@ -289,28 +274,22 @@ class filter_annoto extends moodle_text_filter {
             'moodle/question:add',
             'moodle/notes:manage',
             'moodle/course:manageactivities',
-            //'moodle/analytics:listinsights', // Moodle 3.3 doesn't have this capability yet (only since Moodle 3.4)
         );
 
         $coursecontext = context_course::instance($COURSE->id);
 
-        // check the minimum required capabilities
-        foreach($reqcapabilities as $cap) {
+        // Check the minimum required capabilities.
+        foreach ($reqcapabilities as $cap) {
             if (!has_capability($cap, $coursecontext)) {
                 return false;
             }
         }
 
-        // Check if user is site admin. don't consider site admin as moderator..
-        /* if (is_siteadmin($USER->id)) {
-            return true;
-        } */
-
-        // Check if user has a role as defined in settings
+        // Check if user has a role as defined in settings.
         $userroles = get_user_roles($coursecontext, $USER->id, true);
         $allowedroles = explode(',', $settings->moderatorroles);
 
-        foreach($userroles as $role) {
+        foreach ($userroles as $role) {
             if (in_array($role->roleid, $allowedroles)) {
                 return true;
             }
